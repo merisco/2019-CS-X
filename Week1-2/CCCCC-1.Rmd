@@ -1,0 +1,47 @@
+## Week1-2
+#### Goal: To integrate two data frames concerning the number and nationality of tourists leaving for Taiwan, as well as the number of Taiwanese tourists and their destination.
+#### Data Source:
+#### -https://data.gov.tw/dataset/7325
+#### -https://data.gov.tw/dataset/45537
+
+### Step1:Import data
+```{r}
+library(dplyr)
+library(readxl)
+Foreignernation <-read_excel("C:\\Users\\User\\Desktop\\Foreigner_nation.xlsx")
+Taiwanesedestination <- read_excel("C:\\Users\\User\\Desktop\\Taiwanese_destination (2).xlsx")
+head(Taiwanesedestination)
+head(Foreignernation)
+```
+### Step2: Use `select()` and `slice()` to set up the range of countries and years.
+```{r}
+Foreignernation1<- slice( Foreignernation, 1,2,5,6,7,8,9,10)
+Foreignernation2<- select( Foreignernation1,2,13,14,15,16,17)
+head(Foreignernation2)
+Taiwanesedestination1 <- slice( Taiwanesedestination, 3,4,6,5,9,8,7,11 )
+Taiwanesedestination2 <- select( Taiwanesedestination1, 2,13,14,15,16,17)
+head(Taiwanesedestination2)
+```
+### Step3: Use `names()` to rename the name of column
+### (FT=Foreign Tourist / TT=Taiwanese Tourist)
+```{r}
+names(Foreignernation2)[names(Foreignernation2)=="2012"]<-"2012_FT"
+names(Foreignernation2)[names(Foreignernation2)=="2013"]<-"2013_FT"
+names(Foreignernation2)[names(Foreignernation2)=="2014"]<-"2014_FT"
+names(Foreignernation2)[names(Foreignernation2)=="2015"]<-"2015_FT"
+names(Foreignernation2)[names(Foreignernation2)=="2016"]<-"2016_FT"
+names(Taiwanesedestination2)[names(Taiwanesedestination2)=="2012"]<-"2012_TT"
+names(Taiwanesedestination2)[names(Taiwanesedestination2)=="2013"]<-"2013_TT"
+names(Taiwanesedestination2)[names(Taiwanesedestination2)=="2014"]<-"2014_TT"
+names(Taiwanesedestination2)[names(Taiwanesedestination2)=="2015"]<-"2015_TT"
+names(Taiwanesedestination2)[names(Taiwanesedestination2)=="2016"]<-"2016_TT"
+head(Foreignernation2)
+head(Taiwanesedestination2)
+```
+### Step4: Integrate two data frames with `cbind()`, then delete the "country" column by assigning it to `NULL`.
+```{r}
+Comparison <- cbind(Foreignernation2, Taiwanesedestination2)
+Comparison$country = NULL
+head(Comparison)
+```
+
