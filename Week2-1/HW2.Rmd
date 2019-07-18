@@ -1,0 +1,65 @@
+# 0715 HW002
+#### Goal:畫出107、108年的數學和社會科考生的級分分布情況，並觀察其差異。
+#### Why:身為108學測的考生，我跟很多人(?)都覺得今年的今年的數學很簡單(新聞說是近五年最簡單)，而我蠻有把握的社會科感覺卻偏難，所以想藉由今年跟去年學測考生的級分分布情況來觀察這兩科的難度在這兩年間是否有差異。
+#### Source:
+#### [107學測各科級分人數百分比累計表] (http://www.ceec.edu.tw/AbilityExam/SatStat/107SATSat/21%E5%8E%9F%E5%A7%8B%E5%88%86%E6%95%B8%E8%88%87%E7%B4%9A%E5%88%86%E5%B0%8D%E7%85%A7%E8%A1%A8107.xls)
+#### [108學測各科級分人數百分比累計表] (http://www.ceec.edu.tw/AbilityExam/SatStat/108SATSat/%E5%9C%96%E8%A1%A8%E8%B3%87%E6%96%99/22%E5%90%84%E7%A7%91%E7%B4%9A%E5%88%86%E4%BA%BA%E6%95%B8%E5%88%86%E5%B8%83%E8%A1%A8108.xls)
+
+### Step1:安裝Package:`readxl`,`dplyr`,`ggplot2`
+```{r warning=FALSE, message=FALSE}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+```
+
+### Step2:匯入Excel檔，*並把Column屬性設為`numeric`(數字才不會以日期形式呈現)*
+```{r warning=FALSE, message=FALSE}
+exam107 <- read_excel("C:/Users/User/Desktop/exam107.xls" , col_types = "numeric")
+suppressWarnings(read_excel("C:/Users/User/Desktop/exam107.xls" , col_types = "numeric"))
+exam108 <- read_excel("C:/Users/User/Desktop/exam108.xls" , col_types = "numeric")
+suppressWarnings(read_excel("C:/Users/User/Desktop/exam108.xls" , col_types = "numeric"))
+head(exam107)
+head(exam108)
+```
+
+### Step3:利用`ggplot2`裡的`geom_col`畫出數學科的人數及百分比
+### (紅色邊框是107年；綠色邊框是108年)
+```{r}
+plot10711 <- ggplot(exam107, aes(x=級數,y=數學人數,fill=級數))+geom_col(colour="red")
+plot10811 <- ggplot(exam108, aes(x=級數,y=數學人數,fill=級數))+geom_col(colour="green")
+plot10711
+plot10811
+plot10712 <- ggplot(exam107, aes(x=級數,y=數學百分比,fill=級數))+geom_col(colour="red")
+plot10812 <- ggplot(exam108, aes(x=級數,y=數學百分比,fill=級數))+geom_col(colour="green")
+plot10712
+plot10812
+```
+
+### Step3:利用`ggplot2`裡的`geom_bar`,`coord_polar`畫出數學人數百分比的圓餅圖
+### (註:百分比適合用於作圓餅圖，也不會因考生人數影響結果)
+```{r}
+plot10713 <- ggplot(exam107, aes(x=factor(1),y=數學百分比,fill=級數))+geom_bar(width=100, stat="identity",colour="red")+coord_polar("y",start=0)
+plot10813 <- ggplot(exam108, aes(x=factor(1),y=數學百分比,fill=級數))+geom_bar(width=100, stat="identity",colour="green")+coord_polar("y",start=0)
+plot10713
+plot10813
+```
+
+### Step4:將社會科人數分布的長條圖、百分比分布的長條和圓餅作出(同前二步)，即可進行比較。
+### (黃色邊框是107年；紫色邊框是108年)
+```{r}
+plot10721 <- ggplot(exam107, aes(x=級數,y=社會人數,fill=級數))+geom_col(colour="gold")
+plot10821 <- ggplot(exam108, aes(x=級數,y=社會人數,fill=級數))+geom_col(colour="maroon1" )
+plot10721
+plot10821
+plot10722 <- ggplot(exam107, aes(x=級數,y=社會百分比,fill=級數))+geom_col(colour="gold")
+plot10822 <- ggplot(exam108, aes(x=級數,y=社會百分比,fill=級數))+geom_col(colour="maroon1" )
+plot10722
+plot10822
+plot10723 <- ggplot(exam107, aes(x=factor(1),y=社會百分比,fill=級數))+geom_bar(width=100, stat="identity",colour="gold")+coord_polar("y",start=0)
+plot10823 <- ggplot(exam108, aes(x=factor(1),y=社會百分比,fill=級數))+geom_bar(width=100, stat="identity",colour="maroon1")+coord_polar("y",start=0)
+plot10723
+plot10823
+```
+
+### Step5:得出結論
+##### 根據長條圖的變化可發現107年的數學科大多數人落在5-11級分，而108年則是分佈相對平均，4-14級分的人數皆相差不多，而從圓餅圖更可以發現，15級分的人比例大約增長2-3倍，不考慮考生實力的話，可以推論出108年的數學學測相較於前一年是較難的。而在社會科的人數比例長條圖中可發現，去年的14與15級分之總和超過了百分之20，今年的總和卻不到百分之10，因此可推論出其難度是有變難的，但圖中10-12級的級分人數是增高的，因此可看出雖然難度增加，但也造成了考生成績分佈相對集中。
