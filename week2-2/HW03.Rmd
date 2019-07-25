@@ -1,0 +1,153 @@
+---
+title: "HW03"
+output: html_document
+---
+
+## 0718 HW03:文字探勘
+#### Goal:分析紅樓夢文本角色出現次數
+#### 備註:因為維基百科的人物列表讀取出為簡體字，故把文本轉換成簡體字再讀入。
+
+### Step1:安裝package
+```{r setup, include=TRUE}
+library(magrittr)
+library(tmcn)
+library(NLP)
+library(xml2)
+library(tm)
+library(tmap)
+library(jiebaRD)
+library(jiebaR)
+library(RColorBrewer)
+library(wordcloud)
+library(rvest)
+library(dplyr)
+library(knitr)
+```
+
+### Step2:設置路徑與讀入文本
+```{r}
+setwd("C:/Users/User/Desktop")
+library(readr)
+REED <- read_file("REED.txt")
+REED <- Corpus(VectorSource(REED))
+toSpace <- content_transformer(function(x, pattern) {
+  return (gsub(pattern, "", x))
+})
+```
+
+### Step3:文本清理(去空格、標點、數字、停用詞)
+```{r, warning=FALSE}
+REED <- tm_map(REED, stripWhitespace) 
+REED <- tm_map(REED, removePunctuation)
+REED <- tm_map(REED, removeNumbers)
+
+REED <- tm_map(REED, toSpace, "的")
+REED <- tm_map(REED, toSpace, "了")
+REED <- tm_map(REED, toSpace, "來")
+REED <- tm_map(REED, toSpace, "我")
+REED <- tm_map(REED, toSpace, "又")
+REED <- tm_map(REED, toSpace, "这")
+REED <- tm_map(REED, toSpace, "说")
+REED <- tm_map(REED, toSpace, "道")
+REED <- tm_map(REED, toSpace, "你")
+REED <- tm_map(REED, toSpace, "去")
+REED <- tm_map(REED, toSpace, "她")
+REED <- tm_map(REED, toSpace, "说")
+REED <- tm_map(REED, toSpace, "听")
+REED <- tm_map(REED, toSpace, "如今")
+REED <- tm_map(REED, toSpace, "有")
+REED <- tm_map(REED, toSpace, "在")
+REED <- tm_map(REED, toSpace, "來")
+REED <- tm_map(REED, toSpace, "是")
+REED <- tm_map(REED, toSpace, "也")
+REED <- tm_map(REED, toSpace, "都")
+REED <- tm_map(REED, toSpace, "来")
+REED <- tm_map(REED, toSpace, "不")
+REED <- tm_map(REED, toSpace, "便")
+REED <- tm_map(REED, toSpace, "就")
+REED <- tm_map(REED, toSpace, "得")
+REED <- tm_map(REED, toSpace, "们")
+REED <- tm_map(REED, toSpace, "个")
+REED <- tm_map(REED, toSpace, "他")
+REED <- tm_map(REED, toSpace, "呢")
+REED <- tm_map(REED, toSpace, "人")
+REED <- tm_map(REED, toSpace, "那")
+REED <- tm_map(REED, toSpace, "着")
+REED <- tm_map(REED, toSpace, "里")
+REED <- tm_map(REED, toSpace, "什")
+REED <- tm_map(REED, toSpace, "皆")
+REED <- tm_map(REED, toSpace, "之")
+REED <- tm_map(REED, toSpace, "只")
+REED <- tm_map(REED, toSpace, "上")
+REED <- tm_map(REED, toSpace, "好")
+REED <- tm_map(REED, toSpace, "吃")
+REED <- tm_map(REED, toSpace, "要")
+REED <- tm_map(REED, toSpace, "一")
+REED <- tm_map(REED, toSpace, "见")
+REED <- tm_map(REED, toSpace, "家")
+REED <- tm_map(REED, toSpace, "笑")
+REED <- tm_map(REED, toSpace, "与")
+REED <- tm_map(REED, toSpace, "过")
+REED <- tm_map(REED, toSpace, "忙")
+REED <- tm_map(REED, toSpace, "等")
+REED <- tm_map(REED, toSpace, "还")
+REED <- tm_map(REED, toSpace, "么")
+REED <- tm_map(REED, toSpace, "中")
+REED <- tm_map(REED, toSpace, "因")
+
+
+
+```
+
+### Step4:使用`read_html`即`html_nodes`讀入維基百科的角色列表 ，存為CSV檔並設為worker
+```{r}
+path <-"https://zh.wikipedia.org/wiki/%E7%BA%A2%E6%A5%BC%E6%A2%A6%E4%BA%BA%E7%89%A9%E5%88%97%E8%A1%A8"
+data <- read_html(path) %>% html_nodes("tr+ tr td:nth-child(1) a") %>% html_text()
+data
+data <- as_data_frame(data)
+readr::write_csv(data, "Names.csv")
+names <- readr::read_csv("Names.csv")
+seg <- worker(bylines = F, symbol = T,
+              user = "Names.csv")
+```
+
+## Step5:斷詞
+```{r}
+mixseg = worker()
+jieba_tokenizer=function(d){
+unlist(segment(d[[1]],mixseg))
+}
+
+seg = lapply(REED, jieba_tokenizer)
+freqFrame = as.data.frame(table(unlist(seg)))
+```
+
+### Step6:文字雲製作
+```{r,warning=FALSE}
+par(family=("Heiti TC Light"))
+wordcloud(freqFrame$Var1,freqFrame$Freq,
+scale=c(5,0.1),min.freq=30,max.words=150,
+random.order=TRUE, random.color=FALSE,
+rot.per=.1, colors=brewer.pal(8, "Dark2"),
+ordered.colors=FALSE,use.r.layout=FALSE,
+fixed.asp=TRUE)
+```
+
+### Step7:顯示各字出現字數
+```{r}
+mixseg = worker()
+jieba_tokenizer=function(d){
+  unlist(segment(d[[1]],mixseg))
+}
+seg = lapply(REED, jieba_tokenizer)
+freqFrame = as.data.frame(table(unlist(seg)))
+freqFrame = freqFrame[order(freqFrame$Freq,decreasing=TRUE), ]
+library(knitr)
+kable(head(freqFrame), format = "markdown")
+
+```
+
+### Result&Problem:做出文字雲與文字出現次數，但無法呈現角色出現多寡(只有寶玉和劉姥姥等名字)，推測是因為: 1.其他字數量相對較多 2.小說中人物大多以二字呈現
+### Probable solution:修改名單、找到直接呈現名字出現次數的code寫法
+
+
