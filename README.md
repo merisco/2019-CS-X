@@ -12,5 +12,6 @@ Intro：哈囉，我是曾詠晨，興趣是攝影，希望可以在這堂課精
 #### Week2-1
 [7/12 HW-2](https://merisco.github.io/2019-CS-X/Week2-1/HW2.html) <br />
 #### Week2-2
+[7/18 HW-3](https://merisco.github.io/2019-CS-X/week2-2/HW03.html) <br />
 #### Week3-1
 #### Week3-3
